@@ -51,9 +51,6 @@ module.exports = grammar({
 
     _sexp: ($) =>
       choice(
-        $.special_form,
-        $.function_definition,
-        $.macro_definition,
         $.list,
         $.vector,
         $.hash_table,
@@ -64,68 +61,7 @@ module.exports = grammar({
         $.unquote_splice,
         $.unquote
       ),
-
-    special_form: ($) =>
-      seq(
-        "(",
-        choice(
-          "and",
-          "catch",
-          "cond",
-          "condition-case",
-          "defconst",
-          "defvar",
-          "function",
-          "if",
-          "interactive",
-          "lambda",
-          "let",
-          "let*",
-          "or",
-          "prog1",
-          "prog2",
-          "progn",
-          "quote",
-          "save-current-buffer",
-          "save-excursion",
-          "save-restriction",
-          "setq",
-          "setq-default",
-          "unwind-protect",
-          "while"
-        ),
-        repeat($._sexp),
-        ")"
-      ),
-
-    function_definition: ($) =>
-      prec(
-        1,
-        seq(
-          "(",
-          choice("defun", "defsubst"),
-          field("name", $.symbol),
-          optional(field("parameters", $._sexp)),
-          optional(field("docstring", $.string)),
-          repeat($._sexp),
-          ")"
-        )
-      ),
-
-    macro_definition: ($) =>
-      prec(
-        1,
-        seq(
-          "(",
-          "defmacro",
-          field("name", $.symbol),
-          optional(field("parameters", $._sexp)),
-          optional(field("docstring", $.string)),
-          repeat($._sexp),
-          ")"
-        )
-      ),
-
+    
     _atom: ($) =>
       choice(
         $.float,
