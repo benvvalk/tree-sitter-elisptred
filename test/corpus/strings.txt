@@ -1,0 +1,184 @@
+==================
+Empty string
+==================
+
+""
+
+---
+
+(source_file
+  (string
+    (string_line)))
+
+==================
+Single-line string
+==================
+
+"hello world"
+
+---
+
+(source_file
+  (string
+    (string_line)))
+
+==================
+Multi-line string
+==================
+
+"line 1
+line 2
+line 3"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)
+    (string_line)))
+
+==================
+String with empty lines
+==================
+
+"first line
+
+third line"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)
+    (string_line)))
+
+==================
+Single line with trailing newline
+==================
+
+"single line
+"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)))
+
+==================
+Escaped newline (not a line separator)
+==================
+
+"line with \n escaped newline"
+
+---
+
+(source_file
+  (string
+    (string_line)))
+
+==================
+Multiple trailing newlines
+==================
+
+"text
+
+
+"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)
+    (string_line)
+    (string_line)))
+
+==================
+Only newlines
+==================
+
+"
+
+"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)
+    (string_line)))
+
+==================
+Escaped quote in single line
+==================
+
+"string with \" escaped quote"
+
+---
+
+(source_file
+  (string
+    (string_line)))
+
+==================
+Escaped quote in multi-line
+==================
+
+"first line with \"quote\"
+second line"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)))
+
+==================
+Multiple strings in source
+==================
+
+"first"
+"second"
+
+---
+
+(source_file
+  (string
+    (string_line))
+  (string
+    (string_line)))
+
+==================
+String with escaped backslash
+==================
+
+"path\\to\\file"
+
+---
+
+(source_file
+  (string
+    (string_line)))
+
+==================
+Complex multi-line with escapes
+==================
+
+"first line
+line with \"quotes\" and \\backslash
+third line"
+
+---
+
+(source_file
+  (string
+    (string_line)
+    (string_line)
+    (string_line)))
