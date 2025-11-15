@@ -1,8 +1,12 @@
 const COMMENT = token(/;.*/);
 
-const STRING = token(
-  seq('"', repeat(choice(/[^"\\]/, seq("\\", /(.|\n)/))), '"')
+// Token for string content on a single line (no unescaped newlines or quotes)
+const STRING_LINE_CONTENT = token.immediate(
+  repeat(choice(/[^"\\\n]/, seq("\\", /./)))
 );
+
+// Newline character inside a string (literal newline, not escaped)
+const STRING_NEWLINE = token.immediate(/\n/);
 
 // Symbols can contain any character when escaped:
 // https://www.gnu.org/software/emacs/manual/html_node/elisp/Symbol-Type.html
@@ -91,7 +95,15 @@ module.exports = grammar({
         KEY_CHAR,
         META_OCTAL_CHAR
       ),
-    string: ($) => STRING,
+    string: ($) => seq(
+      '"',
+      optional(seq(
+        $.string_line,
+        repeat(seq(STRING_NEWLINE, $.string_line))
+      )),
+      '"'
+    ),
+    string_line: ($) => STRING_LINE_CONTENT,
     byte_compiled_file_name: ($) => BYTE_COMPILED_FILE_NAME,
     symbol: ($) =>
       choice(
