@@ -351,6 +351,21 @@
     }
   },
   {
+    "type": "string",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "string_line",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "string_text_properties",
     "named": true,
     "fields": {},
@@ -624,6 +639,10 @@
     }
   },
   {
+    "type": "\"",
+    "named": false
+  },
+  {
     "type": "##",
     "named": false
   },
@@ -701,7 +720,7 @@
     "named": false
   },
   {
-    "type": "string",
+    "type": "string_line",
     "named": true
   },
   {
