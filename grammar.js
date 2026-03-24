@@ -41,13 +41,21 @@ const META_OCTAL_CHAR = token(/\?\\M-\\[0-9]{1,3}/);
 // https://www.gnu.org/software/emacs/manual/html_node/elisp/Special-Read-Syntax.html
 const BYTE_COMPILED_FILE_NAME = token("#$");
 
+const WHITESPACE = token(/(\s|\f)+/);
+
 module.exports = grammar({
   name: "elisptred",
 
-  extras: ($) => [/(\s|\f)/, $.comment],
+  extras: ($) => [$.comment],
 
   rules: {
-    source_file: ($) => repeat($._sexp),
+    source_file: ($) =>
+      seq(
+        optional($.whitespace),
+        repeat(seq($._sexp, optional($.whitespace))),
+      ),
+
+    whitespace: ($) => WHITESPACE,
 
     _sexp: ($) =>
       choice(
@@ -114,13 +122,47 @@ module.exports = grammar({
     unquote: ($) => seq(",", $._sexp),
 
     dot: ($) => token("."),
-    list: ($) => seq("(", choice(repeat($._sexp)), ")"),
-    vector: ($) => seq("[", repeat($._sexp), "]"),
-    bytecode: ($) => seq("#[", repeat($._sexp), "]"),
 
-    string_text_properties: ($) => seq("#(", $.string, repeat($._sexp), ")"),
+    list: ($) =>
+      seq(
+        "(",
+        optional($.whitespace),
+        repeat(seq($._sexp, optional($.whitespace))),
+        ")"
+      ),
 
-    hash_table: ($) => seq("#s(hash-table", repeat($._sexp), ")"),
+    vector: ($) =>
+      seq(
+        "[",
+        optional($.whitespace),
+        repeat(seq($._sexp, optional($.whitespace))),
+        "]"
+      ),
+
+    bytecode: ($) =>
+      seq(
+        "#[",
+        optional($.whitespace),
+        repeat(seq($._sexp, optional($.whitespace))),
+        "]"
+      ),
+
+    string_text_properties: ($) =>
+      seq(
+        "#(",
+        $.string,
+        optional($.whitespace),
+        repeat(seq($._sexp, optional($.whitespace))),
+        ")"
+      ),
+
+    hash_table: ($) =>
+      seq(
+        "#s(hash-table",
+        optional($.whitespace),
+        repeat(seq($._sexp, optional($.whitespace))),
+        ")"
+      ),
 
     comment: ($) => COMMENT,
   },
