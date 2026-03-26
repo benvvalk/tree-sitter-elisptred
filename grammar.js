@@ -41,7 +41,8 @@ const META_OCTAL_CHAR = token(/\?\\M-\\[0-9]{1,3}/);
 // https://www.gnu.org/software/emacs/manual/html_node/elisp/Special-Read-Syntax.html
 const BYTE_COMPILED_FILE_NAME = token("#$");
 
-const WHITESPACE = token(/(\s|\f)+/);
+const HORIZONTAL_WHITESPACE = token(/[ \t|\f]+/);
+const NEWLINE = token("\n");
 
 module.exports = grammar({
   name: "elisptred",
@@ -51,11 +52,14 @@ module.exports = grammar({
   rules: {
     source_file: ($) =>
       seq(
-        optional($.whitespace),
-        repeat(seq($._sexp, optional($.whitespace))),
+        optional($._whitespace),
+        repeat(seq($._sexp, optional($._whitespace))),
       ),
 
-    whitespace: ($) => WHITESPACE,
+    _whitespace: ($) => repeat1(choice($.horizontal_whitespace, $.newline)),
+
+    horizontal_whitespace: ($) => HORIZONTAL_WHITESPACE,
+    newline: ($) => NEWLINE,
 
     _sexp: ($) =>
       choice(
@@ -126,24 +130,24 @@ module.exports = grammar({
     list: ($) =>
       seq(
         "(",
-        optional($.whitespace),
-        repeat(seq($._sexp, optional($.whitespace))),
+        optional($._whitespace),
+        repeat(seq($._sexp, optional($._whitespace))),
         ")"
       ),
 
     vector: ($) =>
       seq(
         "[",
-        optional($.whitespace),
-        repeat(seq($._sexp, optional($.whitespace))),
+        optional($._whitespace),
+        repeat(seq($._sexp, optional($._whitespace))),
         "]"
       ),
 
     bytecode: ($) =>
       seq(
         "#[",
-        optional($.whitespace),
-        repeat(seq($._sexp, optional($.whitespace))),
+        optional($._whitespace),
+        repeat(seq($._sexp, optional($._whitespace))),
         "]"
       ),
 
@@ -151,16 +155,16 @@ module.exports = grammar({
       seq(
         "#(",
         $.string,
-        optional($.whitespace),
-        repeat(seq($._sexp, optional($.whitespace))),
+        optional($._whitespace),
+        repeat(seq($._sexp, optional($._whitespace))),
         ")"
       ),
 
     hash_table: ($) =>
       seq(
         "#s(hash-table",
-        optional($.whitespace),
-        repeat(seq($._sexp, optional($.whitespace))),
+        optional($._whitespace),
+        repeat(seq($._sexp, optional($._whitespace))),
         ")"
       ),
 
