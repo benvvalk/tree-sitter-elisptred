@@ -41,12 +41,16 @@ const META_OCTAL_CHAR = token(/\?\\M-\\[0-9]{1,3}/);
 // https://www.gnu.org/software/emacs/manual/html_node/elisp/Special-Read-Syntax.html
 const BYTE_COMPILED_FILE_NAME = token("#$");
 
-const WHITESPACE = token(/(\s|\f)+/);
+// const WHITESPACE_BLANK_LINE = token(/\n[ \t\f]*\n/);
+// const WHITESPACE_HORIZONTAL = token(/[ \t\f]+/);
+// const WHITESPACE_NEWLINE = token("\n");
 
 module.exports = grammar({
   name: "elisptred",
 
   extras: ($) => [$.comment],
+
+  externals: ($) => [$.whitespace_horizontal, $.whitespace_blank_line, $.whitespace_newline],
 
   rules: {
     source_file: ($) =>
@@ -55,7 +59,18 @@ module.exports = grammar({
         repeat(seq($._sexp, optional($.whitespace))),
       ),
 
-    whitespace: ($) => WHITESPACE,
+    whitespace: ($) =>
+      repeat1(
+        choice(
+          $.whitespace_horizontal,
+          $.whitespace_blank_line,
+          $.whitespace_newline,
+        )
+      ),
+
+    // whitespace_blank_line: ($) => WHITESPACE_BLANK_LINE,
+    // whitespace_horizontal: ($) => WHITESPACE_HORIZONTAL,
+    // whitespace_newline: ($) => WHITESPACE_NEWLINE,
 
     _sexp: ($) =>
       choice(
