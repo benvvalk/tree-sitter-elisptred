@@ -28,11 +28,19 @@
           "named": true
         },
         {
+          "type": "horizontal_whitespace",
+          "named": true
+        },
+        {
           "type": "integer",
           "named": true
         },
         {
           "type": "list",
+          "named": true
+        },
+        {
+          "type": "newline",
           "named": true
         },
         {
@@ -61,10 +69,6 @@
         },
         {
           "type": "vector",
-          "named": true
-        },
-        {
-          "type": "whitespace",
           "named": true
         }
       ]
@@ -109,11 +113,19 @@
           "named": true
         },
         {
+          "type": "horizontal_whitespace",
+          "named": true
+        },
+        {
           "type": "integer",
           "named": true
         },
         {
           "type": "list",
+          "named": true
+        },
+        {
+          "type": "newline",
           "named": true
         },
         {
@@ -142,10 +154,6 @@
         },
         {
           "type": "vector",
-          "named": true
-        },
-        {
-          "type": "whitespace",
           "named": true
         }
       ]
@@ -185,11 +193,19 @@
           "named": true
         },
         {
+          "type": "horizontal_whitespace",
+          "named": true
+        },
+        {
           "type": "integer",
           "named": true
         },
         {
           "type": "list",
+          "named": true
+        },
+        {
+          "type": "newline",
           "named": true
         },
         {
@@ -218,10 +234,6 @@
         },
         {
           "type": "vector",
-          "named": true
-        },
-        {
-          "type": "whitespace",
           "named": true
         }
       ]
@@ -324,11 +336,19 @@
           "named": true
         },
         {
+          "type": "horizontal_whitespace",
+          "named": true
+        },
+        {
           "type": "integer",
           "named": true
         },
         {
           "type": "list",
+          "named": true
+        },
+        {
+          "type": "newline",
           "named": true
         },
         {
@@ -357,10 +377,6 @@
         },
         {
           "type": "vector",
-          "named": true
-        },
-        {
-          "type": "whitespace",
           "named": true
         }
       ]
@@ -395,11 +411,19 @@
           "named": true
         },
         {
+          "type": "horizontal_whitespace",
+          "named": true
+        },
+        {
           "type": "integer",
           "named": true
         },
         {
           "type": "list",
+          "named": true
+        },
+        {
+          "type": "newline",
           "named": true
         },
         {
@@ -428,10 +452,6 @@
         },
         {
           "type": "vector",
-          "named": true
-        },
-        {
-          "type": "whitespace",
           "named": true
         }
       ]
@@ -605,11 +625,19 @@
           "named": true
         },
         {
+          "type": "horizontal_whitespace",
+          "named": true
+        },
+        {
           "type": "integer",
           "named": true
         },
         {
           "type": "list",
+          "named": true
+        },
+        {
+          "type": "newline",
           "named": true
         },
         {
@@ -638,10 +666,6 @@
         },
         {
           "type": "vector",
-          "named": true
-        },
-        {
-          "type": "whitespace",
           "named": true
         }
       ]
@@ -721,6 +745,14 @@
     "named": false
   },
   {
+    "type": "horizontal_whitespace",
+    "named": true
+  },
+  {
+    "type": "newline",
+    "named": true
+  },
+  {
     "type": "nil",
     "named": false
   },
@@ -731,9 +763,5 @@
   {
     "type": "t",
     "named": false
-  },
-  {
-    "type": "whitespace",
-    "named": true
   }
 ]
