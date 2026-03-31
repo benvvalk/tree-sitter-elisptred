@@ -1,0 +1,169 @@
+#!/usr/bin/env bash
+set -eu -o pipefail
+
+# Command-line options spec for `argc`:
+#
+# @meta require-tools git,jq
+#
+# @option --abi           tree-sitter ABI version [LANGUAGE_VERSION from 'src/parser.c']
+# @option --commit=HEAD   git commit for release
+# @flag   --dry-run       print commands that would be executed, without running them
+# @flag   --push          push release tag to origin [disabled]
+# @option --version       number for release ['version' from 'package.json']
+
+run() {
+    if [[ -v argc_dry_run ]]; then
+        # Special case: When executing `_main()` with `--dry-run`, we
+        # want to print the commands inside of `_main()`, not just the
+        # invocation of `_main` itself.
+        if [[ $1 == "_main" ]]; then
+            "$@"
+        else
+            echo "$@" >&2
+        fi
+    else
+        "$@"
+    fi
+}
+
+without_dry_run() {
+    (unset argc_dry_run; "$@")
+}
+
+git_worktree_create() {
+    local git_commit="$1"
+
+    # If the user passed `--dry-run` to this script, also pass
+    # `--dry-run` to `mktemp`. This gives us a directory name we
+    # can use in the printed `--dry-run` commands.
+
+    if [[ -v argc_dry_run ]]; then
+        local mktemp_opt="--dry-run"
+    else
+        local mktemp_opt=""
+    fi
+
+    local worktree_dir=$(mktemp --directory --tmpdir ${mktemp_opt} git-worktree.XXXXXX)
+        
+    run git worktree add --quiet --detach "$worktree_dir" "$git_commit" || {
+        echo "Failed to create worktree for git_commit $git_commit" >&2
+        return 1
+    }
+
+    echo "$worktree_dir"
+}
+
+git_worktree_destroy() {
+    local worktree_dir="$1"
+    run git worktree remove --force "$worktree_dir" 2>/dev/null
+    run rm -rf "$worktree_dir"
+}
+
+with_git_commit() {
+    local git_commit="$1"
+    shift
+
+    if [[ "$1" != "--" ]]; then
+        echo "with_git_commit: expected '--' after commit ID" >&2
+        return 1
+    fi
+    shift
+
+    worktree_dir=$(git_worktree_create "$git_commit")
+    # Clean up, even when provided shell command fails
+    trap "git_worktree_destroy '$worktree_dir'" EXIT
+
+    # Run given shell command in worktree dir
+    (run cd "$worktree_dir" && run "$@")
+    local cmd_status=$?
+
+    # Clean-up
+    git_worktree_destroy "$worktree_dir"
+    trap - EXIT
+
+    return $((cmd_status)) # convert string to number
+}
+
+abi_get() {
+    grep LANGUAGE_VERSION src/parser.c | head -1 | awk '{print $3}'
+}
+
+abi_default() {
+    with_git_commit "${argc_commit}" -- abi_get
+}
+
+version_get() {
+    jq -r '.version' package.json
+}
+
+version_set() {
+    version="$1"
+    # Note: In order for the `--dry-run` functionality to work
+    # properly for this line, we need the output redirection to apply
+    # only for the `jq` command, not to `run` itself. That's why we
+    # run the `jq` command in a `sh` subprocess here.
+    run sh -c "jq '.version = \"$version\"' package.json > package.json.tmp"
+    run mv package.json.tmp package.json
+}
+
+version_default() {
+    with_git_commit "${argc_commit}" -- version_get
+}
+
+# NOTE: If there is a `main()` function, `argc` will auto-invoke it
+# after parsing the command line options. (`main()` is used for the
+# default command when `argc` is used with sub-commands defined by
+# `@cmd`.) Since I don't want `main()` to be invoked twice, I named
+# the function `_main()` instead.
+
+_main() {
+    tag="${argc_version}-abi-${argc_abi}"
+
+    if [[ $argc_abi -ne $abi_from_commit ]]; then
+        echo "Creating new commit: tree-sitter ABI version from ${argc_commit} is ${abi_from_commit}, which does not match --abi=${argc_abi}..." >&2
+        run tree-sitter generate --abi="${argc_abi}"
+        run git add .
+        run git commit --message="run: \`tree-sitter generate --abi=${argc_abi}\` [run]"
+    fi
+
+    if [[ $argc_version != $version_from_commit ]]; then
+        echo "Creating new commit: 'version' from 'package.json' from ${argc_commit} is ${version_from_commit}, which does not match --version=${argc_version}..." >&2
+        version_set "$argc_version"
+        run git add .
+        run git commit --message="package.json: change \`version\` to ${argc_version} [version]"
+    fi
+
+    run git tag --message="grammar version ${argc_version}, tree-sitter ABI version ${argc_abi}" "$tag"
+
+    if [[ -v argc_push ]]; then
+        run git push origin tag "$tag"
+    fi
+}
+
+
+# Parse command-line options and assign to variables using `argc`.
+# Note: See the `@option` specs at the top of this file.
+
+eval "$(argc --argc-eval "$0" "$@")"
+
+# Compute default values for tree-sitter ABI version and grammar version,
+# based on the target git commit.
+# 
+# Note: `argc` has built-in functionality for computing default option
+# values using backticks, but that isn't flexible enough for what we
+# need.  We need access to the target commit (`$argc_commit`) when
+# computing the default values, in a way that isn't dependent on where
+# `--commit` appears on the command line.
+
+abi_from_commit=$(without_dry_run abi_default)
+if [[ ! -v argc_abi ]]; then
+    argc_abi="$abi_from_commit"
+fi
+version_from_commit=$(without_dry_run version_default)
+if [[ ! -v argc_version ]]; then
+    argc_version="$version_from_commit"
+fi
+
+# Do the thing.
+
+with_git_commit "$argc_commit" -- _main
